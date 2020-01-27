@@ -5,6 +5,7 @@ racnho-admin-web是基于vue、element-ui开发的一套最小前端管理系统
   www.rancho.io
 # 特别感谢项目脚手架提供者
   https://github.com/PanJiaChen/vue-element-admin
+# 有问题欢迎issues
 # 搭建步骤
     # 安装依赖
     npm install
