@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # vue-admin-template
 
 English | [简体中文](./README-zh.md)
@@ -89,3 +90,24 @@ Modern browsers and Internet Explorer 10+.
 [MIT](https://github.com/PanJiaChen/vue-admin-template/blob/master/LICENSE) license.
 
 Copyright (c) 2017-present PanJiaChen
+=======
+# rancho-admin-web
+racnho-admin-web是基于vue、element-ui开发的一套最小前端管理系统，其中功能包括登陆、管理员管理、角色管理<br>
+后端项目源码：[https://github.com/rancho00/rancho-web](https://github.com/rancho00/rancho-web)
+# 演示地址
+  www.rancho.io
+# 特别感谢项目脚手架提供者
+  https://github.com/PanJiaChen/vue-element-admin
+# 有问题欢迎issues
+# 搭建步骤
+    # 安装依赖
+    npm install
+    # 启动服务 localhost:8013
+    npm run dev
+    # 构建生产环境
+    npm run build
+# 联系我
+  rancho-admin-web项目全套学习教程连载中，关注公众号第一时间获取。<br>
+  如果想加入QQ群交流，公众号回复"加群"即可<br>
+  ![](https://github.com/rancho00/rancho-web/blob/master/document/8cm.jpg)
+>>>>>>> 52f1a5d7a9c2a5c73a8c6e219a6a028bed3b0544
