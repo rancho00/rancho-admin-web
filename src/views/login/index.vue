@@ -41,9 +41,24 @@
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登陆</el-button>
-
+      <el-button :loading="loading" type="primary" style="width:45%;" @click.native.prevent="handleLogin">登陆</el-button>
+      <el-button  type="primary" style="width:45%;" @click.native.prevent="handleTry">获取体验账号</el-button>
     </el-form>
+    <el-dialog
+      title="公众号二维码"
+      :visible.sync="dialogVisible"
+      :show-close="false"
+      :center="true"
+      width="30%">
+      <div style="text-align: center">
+        <span class="font-title-large"><span class="color-main font-extra-large">关注公众号</span>回复<span class="color-main font-extra-large">体验</span>获取体验账号</span>
+        <br>
+        <img src="http://123.57.164.79:8089/8cm.jpg" width="160" height="160" style="margin-top: 10px">
+      </div>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="dialogConfirm">确定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -69,7 +84,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '123456'
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -77,7 +92,8 @@ export default {
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      dialogVisible: false
     }
   },
   watch: {
@@ -114,6 +130,12 @@ export default {
           return false
         }
       })
+    },
+    handleTry(){
+      this.dialogVisible =true
+    },
+    dialogConfirm(){
+      this.dialogVisible =false;
     }
   }
 }
@@ -230,4 +252,12 @@ export default {
       user-select: none;
     }
   }
+//主标题
+.font-extra-large {
+  font-size: 20px;
+  color: #303133;
+}
+.color-main {
+  color: #409EFF;
+}
 </style>

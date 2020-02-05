@@ -88,7 +88,7 @@ service.interceptors.response.use(
   },
   error => {
     Message({
-      message: error.message,
+      message: '服务器异常',
       type: 'error',
       duration: 5 * 1000
     })
