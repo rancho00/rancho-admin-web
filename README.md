@@ -2,7 +2,7 @@
 racnho-admin-web是基于vue、element-ui开发的一套最小前端管理系统，其中功能包括登陆、管理员管理、角色管理<br>
 后端项目源码：[https://github.com/rancho00/rancho-web](https://github.com/rancho00/rancho-web)
 # 演示地址
-  www.rancho.io
+  http://123.57.164.79:8089/admin-web
 # 特别感谢项目脚手架提供者
   https://github.com/PanJiaChen/vue-element-admin
 # 有问题欢迎issues
