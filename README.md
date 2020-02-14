@@ -9,7 +9,7 @@ racnho-admin-web是基于vue、element-ui开发的一套最小前端管理系统
 # 搭建步骤
     # 安装依赖
     npm install
-    # 启动服务 localhost:8013
+    # 启动服务
     npm run dev
     # 构建生产环境
     npm run build
