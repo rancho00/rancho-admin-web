@@ -16,4 +16,4 @@ racnho-admin-web是基于vue、element-ui开发的一套最小前端管理系统
 # 联系我
   rancho-admin-web项目全套学习教程连载中，关注公众号第一时间获取。<br>
   如果想加入QQ群交流，公众号回复"加群"即可<br>
-  ![](https://github.com/rancho00/rancho-web/blob/master/document/8cm.jpg)
+  ![](http://123.57.164.79:8089/8cm.jpg)
