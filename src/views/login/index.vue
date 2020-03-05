@@ -51,7 +51,8 @@
       :center="true"
       width="30%">
       <div style="text-align: center">
-        <span class="font-title-large"><span class="color-main font-extra-large">关注公众号</span>回复<span class="color-main font-extra-large">体验</span>获取体验账号</span>
+<!--        <span class="font-title-large"><span class="color-main font-extra-large">关注公众号</span>回复<span class="color-main font-extra-large">体验</span>获取体验账号</span>-->
+        <span class="font-title-large"><span class="color-main font-extra-large">关注公众号获取项目连载资料</span></span>
         <br>
         <img src="http://123.57.164.79:8089/8cm.jpg" width="160" height="160" style="margin-top: 10px">
       </div>
@@ -84,7 +85,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: ''
+        password: 'rancho123456'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
