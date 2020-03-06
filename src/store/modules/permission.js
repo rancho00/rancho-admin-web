@@ -22,6 +22,7 @@ const actions = {
   generateRoutes({ commit }, menus) {
     return new Promise(resolve => {
       const accessedRoutes = generateRoutes(menus)
+      console.log(accessedRoutes)
       commit('SET_ROUTES', accessedRoutes)
       commit('SET_PERMISSIONS', permissions)
       resolve(accessedRoutes)
@@ -32,27 +33,64 @@ const actions = {
 const permissions = []
 export function generateRoutes(menus) {
   const res = []
-  menus.forEach(menu => {
-    const data = {
-      path: menu.uri,
-      name: menu.name,
-      meta: { title: menu.name, icon: menu.icon }
+  // menus.forEach(menu => {
+  //   const data = {
+  //     path: menu.uri,
+  //     name: menu.name,
+  //     meta: { title: menu.name, icon: menu.icon }
+  //   }
+  //   if (menu.type === 0) {
+  //     data.component = Layout
+  //   } else if (menu.type === 1) {
+  //     data.component = () => import(`@/views/${menu.component}`)
+  //   }
+  //   if (menu.isHidden === 0) {
+  //     data.hidden = false
+  //   } else {
+  //     data.hidden = true
+  //   }
+  //   if (menu.smsMenuList) {
+  //     data.children = generateRoutes(menu.smsMenuList)
+  //   }
+  //   permissions.push(menu.value)
+  //   res.push(data)
+  // })
+  menus.forEach(firstMenu => {
+    const route = {
+      path: firstMenu.uri,
+      name: firstMenu.name,
+      meta: { title: firstMenu.name, icon: firstMenu.icon },
+      component: Layout,
+      hidden: false
     }
-    if (menu.type === 0) {
-      data.component = Layout
-    } else if (menu.type === 1) {
-      data.component = () => import(`@/views/${menu.component}`)
+    permissions.push(firstMenu.value)
+    const children = []
+    if (firstMenu.smsMenuList) {
+      firstMenu.smsMenuList.forEach(secondMenu => {
+        children.push({
+          path: secondMenu.uri,
+          name: secondMenu.name,
+          meta: { title: secondMenu.name, icon: secondMenu.icon },
+          component: () => import(`@/views/${secondMenu.component}`),
+          hidden: false
+        })
+        permissions.push(secondMenu.value)
+        if (secondMenu.smsMenuList) {
+          secondMenu.smsMenuList.forEach(functionMenu => {
+            children.push({
+              path: functionMenu.uri,
+              name: functionMenu.name,
+              meta: { title: functionMenu.name, icon: functionMenu.icon },
+              component: () => import(`@/views/${functionMenu.component}`),
+              hidden: functionMenu.isHidden === 1
+            })
+            permissions.push(functionMenu.value)
+          })
+        }
+      })
     }
-    if (menu.isHidden === 0) {
-      data.hidden = false
-    } else {
-      data.hidden = true
-    }
-    if (menu.smsMenuList) {
-      data.children = generateRoutes(menu.smsMenuList)
-    }
-    permissions.push(menu.value)
-    res.push(data)
+    route.children = children
+    res.push(route)
   })
   return res
 }
