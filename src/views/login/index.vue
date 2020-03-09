@@ -42,22 +42,23 @@
       </el-form-item>
 
       <el-button :loading="loading" type="primary" style="width:45%;" @click.native.prevent="handleLogin">登陆</el-button>
-      <el-button  type="primary" style="width:45%;" @click.native.prevent="handleTry">获取体验账号</el-button>
+      <el-button type="primary" style="width:45%;" @click.native.prevent="handleTry">获取体验账号</el-button>
     </el-form>
     <el-dialog
       title="公众号二维码"
       :visible.sync="dialogVisible"
       :show-close="false"
       :center="true"
-      width="30%">
+      width="30%"
+    >
       <div style="text-align: center">
-<!--        <span class="font-title-large"><span class="color-main font-extra-large">关注公众号</span>回复<span class="color-main font-extra-large">体验</span>获取体验账号</span>-->
+        <!--        <span class="font-title-large"><span class="color-main font-extra-large">关注公众号</span>回复<span class="color-main font-extra-large">体验</span>获取体验账号</span>-->
         <span class="font-title-large"><span class="color-main font-extra-large">关注公众号获取项目连载资料</span></span>
         <br>
         <img src="http://123.57.164.79:8089/8cm.jpg" width="160" height="160" style="margin-top: 10px">
       </div>
       <span slot="footer" class="dialog-footer">
-    <el-button type="primary" @click="dialogConfirm">确定</el-button>
+        <el-button type="primary" @click="dialogConfirm">确定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -132,11 +133,11 @@ export default {
         }
       })
     },
-    handleTry(){
-      this.dialogVisible =true
+    handleTry() {
+      this.dialogVisible = true
     },
-    dialogConfirm(){
-      this.dialogVisible =false;
+    dialogConfirm() {
+      this.dialogVisible = false
     }
   }
 }

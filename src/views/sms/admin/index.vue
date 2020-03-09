@@ -21,7 +21,7 @@
     >
       <el-table-column prop="id" sortable="custom" label="ID" align="center" width="80">
         <template slot-scope="scope">
-          {{ scope.$index }}
+          {{ scope.row.id }}
         </template>
       </el-table-column>
       <el-table-column label="用户名" align="center" width="200">
@@ -62,7 +62,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="pageInfo" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
 
     <el-dialog
       :title="dialogType==='edit'?'编辑':'添加'"
@@ -71,27 +71,27 @@
     >
       <el-form
         ref="dataForm"
-        :model="formData"
+        :model="defaultData"
         :rules="rules"
         label-width="150px"
         size="small"
       >
         <el-form-item label="用户名：" prop="username">
-          <el-input v-model="formData.username" style="width: 250px" />
+          <el-input v-model="defaultData.username" style="width: 250px" />
         </el-form-item>
         <el-form-item label="昵称：" prop="nickname">
-          <el-input v-model="formData.nickname" style="width: 250px" />
+          <el-input v-model="defaultData.nickname" style="width: 250px" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="formData.status">
+          <el-radio-group v-model="defaultData.status">
             <el-radio :label="1">启用</el-radio>
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="formData.roleIdList" multiple placeholder="请选择" style="width: 250px">
+          <el-select v-model="defaultData.roleIdList" multiple placeholder="请选择" style="width: 250px">
             <el-option
-              v-for="(item, index) in formData.roleList"
+              v-for="(item, index) in defaultData.roleList"
               :key="item.name + index"
               :label="item.name"
               :value="item.id"
@@ -108,14 +108,14 @@
 </template>
 
 <script>
-import { pageInfo, save, getById, update, updateStatus } from '@/api/admin'
-import { list as roleList } from '@/api/role'
+import { list, save, getById, update, updateStatus } from '@/api/admin'
+import { getRoles as roleList } from '@/api/role'
 import { formatDate } from '@/utils/date'
 import Pagination from '@/components/Pagination'
 import waves from '@/directive/waves'
 import checkPermission from '@/utils/permission'
 
-const formData = {
+const defaultData = {
   id: null,
   username: null,
   status: 1,
@@ -168,8 +168,8 @@ export default {
       total: 0,
       listLoading: true,
       dialogVisible: false,
-      dialogType: 'new',
-      formData: Object.assign({}, formData),
+      dialogType: '',
+      defaultData: Object.assign({}, defaultData),
       rules: {
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }, { validator: (rule, value, callback) => {
           if (value.length < 4) {
@@ -183,17 +183,17 @@ export default {
     }
   },
   created() {
-    this.pageInfo()
+    this.list()
   },
   methods: {
     checkPermission,
     search() {
       this.listQuery.pageNumber = 1
-      this.pageInfo()
+      this.list()
     },
-    pageInfo() {
+    list() {
       this.listLoading = true
-      pageInfo(this.listQuery).then(response => {
+      list(this.listQuery).then(response => {
         this.listData = response.data.list
         this.total = response.data.total
         this.listLoading = false
@@ -201,24 +201,22 @@ export default {
     },
     save() {
       this.dialogVisible = true
-      this.dialogType = 'new'
+      this.dialogType = 'save'
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-      this.setDialogData()
+      this.defaultData = Object.assign({}, defaultData)
       this.getRoleList()
-      this.formData = Object.assign({}, formData)
     },
     update(row) {
       this.dialogVisible = true
-      this.dialogType = 'edit'
+      this.dialogType = 'update'
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
       getById(row.id).then(response => {
         const data = response.data
-        this.setDialogData(data)
-        this.formData = Object.assign({}, formData)
+        this.defaultData = Object.assign({}, data)
         this.getRoleList()
       })
     },
@@ -228,7 +226,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        var status = row.status
+        let status = row.status
         if (status === 1) {
           status = 0
         } else if (status === 0) {
@@ -239,7 +237,7 @@ export default {
             type: 'success',
             message: response.message
           })
-          this.pageInfo()
+          this.list()
         })
       })
     },
@@ -250,24 +248,23 @@ export default {
             confirmButtonText: '确定',
             cancelButtonText: '取消'
           }).then(() => {
-            const isEdit = this.dialogType === 'edit'
-            if (isEdit) {
-              update(this.formData.id, this.formData).then(response => {
+            if (this.dialogType === 'update') {
+              update(this.defaultData.id, this.defaultData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.pageInfo()
+                this.list()
               })
             } else {
-              save(this.formData).then(response => {
+              save(this.defaultData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.pageInfo()
+                this.list()
               })
             }
           })
@@ -276,24 +273,8 @@ export default {
     },
     getRoleList() {
       roleList().then(response => {
-        this.formData.roleList = response.data
+        this.defaultData.roleList = response.data
       })
-    },
-    setDialogData(data) {
-      const isEdit = this.dialogType === 'edit'
-      if (isEdit) {
-        formData.id = data.id
-        formData.username = data.username
-        formData.nickname = data.nickname
-        formData.status = data.status
-        formData.roleIdList = data.roleIdList
-      } else {
-        formData.id = ''
-        formData.username = ''
-        formData.nickname = null
-        formData.status = 1
-        formData.roleIdList = null
-      }
     },
     sortChange(data) {
       const { prop, order } = data
@@ -305,7 +286,7 @@ export default {
         }
       }
       this.listQuery.pageNumber = 1
-      this.pageInfo()
+      this.list()
     }
   }
 }

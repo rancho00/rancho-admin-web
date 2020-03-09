@@ -22,7 +22,6 @@ const actions = {
   generateRoutes({ commit }, menus) {
     return new Promise(resolve => {
       const accessedRoutes = generateRoutes(menus)
-      console.log(accessedRoutes)
       commit('SET_ROUTES', accessedRoutes)
       commit('SET_PERMISSIONS', permissions)
       resolve(accessedRoutes)

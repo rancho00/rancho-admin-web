@@ -1,22 +1,22 @@
 import request from '@/utils/request'
 
-export function pageInfo() {
+export function list() {
   return request({
-    url: '/role/pageInfo',
+    url: '/role',
     method: 'get'
   })
 }
 
-export function list() {
+export function getRoles() {
   return request({
-    url: '/role/list',
+    url: '/role/simpleList',
     method: 'get'
   })
 }
 
 export function save(data) {
   return request({
-    url: '/role/save',
+    url: '/role',
     method: 'post',
     data:
       {
@@ -29,16 +29,16 @@ export function save(data) {
   })
 }
 
-export function getById(id) {
+export function get(id) {
   return request({
-    url: `/role/${id}/getById`,
+    url: `/role/${id}`,
     method: 'get'
   })
 }
 
-export function update(id,data) {
+export function update(id, data) {
   return request({
-    url: '/role/${id}/update',
+    url: `/role/${id}`,
     method: 'put',
     data:
       {
@@ -53,7 +53,7 @@ export function update(id,data) {
 
 export function del(id) {
   return request({
-    url: `/role/${id}/delete`,
+    url: `/role/${id}`,
     method: 'delete'
   })
 }

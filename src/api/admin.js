@@ -22,17 +22,19 @@ export function logout() {
   })
 }
 
-export function pageInfo(params) {
+export function list(params) {
   return request({
-    url: '/admin/pageInfo',
+    url: '/admin',
     method: 'get',
     params
   })
 }
 
+
+
 export function save(data) {
   return request({
-    url: '/admin/save',
+    url: '/admin',
     method: 'post',
     data: data
   })
@@ -40,14 +42,14 @@ export function save(data) {
 
 export function getById(id) {
   return request({
-    url: `/admin/${id}/getById`,
+    url: `/admin/${id}`,
     method: 'get'
   })
 }
 
 export function update(id, data) {
   return request({
-    url: `/admin/${id}/update`,
+    url: `/admin/${id}`,
     method: 'put',
     data
   })
@@ -55,7 +57,8 @@ export function update(id, data) {
 
 export function updateStatus(id, status) {
   return request({
-    url: `/admin/${id}/updateStatus/${status}`,
-    method: 'put'
+    url: `/admin/${id}/status`,
+    method: 'put',
+    param: status
   })
 }

@@ -12,7 +12,8 @@
       border
       highlight-current-row
       :data="listData"
-      style="width: 100%;">
+      style="width: 100%;"
+    >
       <el-table-column align="center" label="ID" width="80">
         <template slot-scope="scope">
           {{ scope.$index }}
@@ -39,14 +40,14 @@
         <template slot-scope="scope">{{ scope.row.createTime | formatDateTime }}</template>
       </el-table-column>
       <el-table-column align="center" label="操作">
-        <template v-if="scope.row.username!=='admin'" slot-scope="scope">
+        <template v-if="scope.row.name!=='admin'" slot-scope="scope">
           <el-button v-if="checkPermission('role:update')" type="primary" size="small" @click="update(scope)">编辑</el-button>
           <el-button v-if="checkPermission('role:delete')" type="danger" size="small" @click="del(scope)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="pageInfo" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
 
     <el-dialog
       :visible.sync="dialogVisible"
@@ -54,23 +55,24 @@
     >
       <el-form
         ref="dataForm"
-        :model="formData"
+        :model="defaultData"
         :rules="rules"
         label-width="150px"
-        size="small">
+        size="small"
+      >
         <el-form-item label="名称" prop="name">
-          <el-input v-model="formData.name" placeholder="名称" />
+          <el-input v-model="defaultData.name" placeholder="名称" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input
-            v-model="formData.description"
+            v-model="defaultData.description"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
             placeholder="描述"
           />
         </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="formData.status">
+          <el-radio-group v-model="defaultData.status">
             <el-radio :label="1">启用</el-radio>
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
@@ -79,7 +81,7 @@
           <el-tree
             ref="tree"
             :check-strictly="checkStrictly"
-            :data="computeMenuListData"
+            :data="menuListData"
             :props="defaultProps"
             show-checkbox
             node-key="path"
@@ -98,13 +100,13 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { pageInfo, save, getById, del, update } from '@/api/role'
+import { list, save, get, del, update } from '@/api/role'
 import { formatDate } from '@/utils/date'
-import { list as menuList } from '@/api/menu'
+import { getHierarchyList as menuList } from '@/api/menu'
 import Pagination from '@/components/Pagination'
 import checkPermission from '@/utils/permission'
 
-const formData = {
+const defaultData = {
   id: null,
   name: '',
   description: '',
@@ -155,7 +157,7 @@ export default {
       listLoading: true,
       dialogVisible: false,
       menuListData: [],
-      formData: Object.assign({}, formData),
+      defaultData: Object.assign({}, defaultData),
       dialogType: 'new',
       defaultProps: {
         children: 'children',
@@ -167,32 +169,28 @@ export default {
       }
     }
   },
-  computed: {
-    computeMenuListData() {
-      return this.menuListData
-    }
-  },
   created() {
     this.menuList()
-    this.pageInfo()
+    this.list()
   },
   methods: {
     checkPermission,
-    async menuList() {
-      const res = await menuList()
-      this.serviceMenuListData = res.data
-      this.menuListData = this.generateMenuList(res.data)
+    menuList() {
+      menuList().then(response => {
+        this.serviceMenuListData = response.data
+        this.menuListData = this.generateMenuList(response.data)
+      })
     },
-    pageInfo() {
+    list() {
       this.listLoading = true
-      pageInfo(this.listQuery).then(response => {
+      list(this.listQuery).then(response => {
         this.listData = response.data.list
         this.total = response.data.total
         this.listLoading = false
       })
     },
     save() {
-      this.formData = Object.assign({}, formData)
+      this.defaultData = Object.assign({}, defaultData)
       if (this.$refs.tree) {
         this.$refs.tree.setCheckedNodes([])
       }
@@ -206,10 +204,10 @@ export default {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
-      this.formData = Object.assign({}, scope.row)
+      this.defaultData = Object.assign({}, scope.row)
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
-        getById(scope.row.id).then(response => {
+        get(scope.row.id).then(response => {
           const checkedNodes = this.generateMenuList(response.data.smsMenuList)
           this.$refs.tree.setCheckedNodes(this.generateCheckedMenus(checkedNodes))
           this.checkStrictly = false
@@ -227,7 +225,7 @@ export default {
             type: 'success',
             message: response.message
           })
-          this.pageInfo()
+          this.list()
         })
       })
     },
@@ -240,24 +238,24 @@ export default {
           }).then(() => {
             const isEdit = this.dialogType === 'edit'
             const checkedKeys = this.$refs.tree.getCheckedKeys()
-            this.formData.menuListData = this.getCheckedMenus(deepClone(this.serviceMenuListData), '/', checkedKeys)
+            this.defaultData.menuListData = this.getCheckedMenus(deepClone(this.serviceMenuListData), '/', checkedKeys)
             if (isEdit) {
-              update(this.formData.id,this.formData).then(response => {
+              update(this.defaultData.id, this.defaultData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.pageInfo()
+                this.list()
               })
             } else {
-              save(this.formData).then(response => {
+              save(this.defaultData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.pageInfo()
+                this.list()
               })
             }
           })
