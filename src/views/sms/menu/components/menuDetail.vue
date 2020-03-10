@@ -150,7 +150,7 @@ export default {
       menuListData: [],
       defaultProps: {
         children: 'children',
-        label: 'title'
+        label: 'name'
       }
     }
   },
@@ -226,7 +226,8 @@ export default {
       for (const menu of smsMenuList) {
         const data = {
           id: menu.id,
-          title: menu.name
+          name: menu.name,
+          disabled: menu.type === 2
         }
         // 遍历子菜单
         if (menu.smsMenuList) {

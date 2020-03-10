@@ -100,7 +100,7 @@
 <script>
 import { list, save, get, del, update } from '@/api/role'
 import { formatDate } from '@/utils/date'
-import { getHierarchyList as menuList } from '@/api/menu'
+import { getHierarchyList as getMenuList } from '@/api/menu'
 import Pagination from '@/components/Pagination'
 import checkPermission from '@/utils/permission'
 
@@ -167,13 +167,13 @@ export default {
     }
   },
   created() {
-    this.menuList()
+    this.getMenuList()
     this.list()
   },
   methods: {
     checkPermission,
-    menuList() {
-      menuList().then(response => {
+    getMenuList() {
+      getMenuList().then(response => {
         this.menuListData = this.generateMenuList(response.data)
       })
     },
@@ -254,7 +254,6 @@ export default {
         }
       })
     },
-
     /**
        * 根据生成菜单
        * @param routes
