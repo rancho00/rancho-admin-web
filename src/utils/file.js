@@ -1,8 +1,8 @@
-const visitUrl = 'http://localhost:8091/file'
-const uploadUrl = 'http://localhost:8091/file/upload'
+// const visitUrl = 'http://localhost:8091/file'
+// const uploadUrl = 'http://localhost:8091/file/upload'
 
-//const visitUrl = 'http://47.108.106.32:8023/file'
-//const uploadUrl = 'http://47.108.106.32:8023/file/upload'
+const visitUrl = 'http://123.57.164.79:8089/file'
+const uploadUrl = 'http://123.57.164.79:8089/file/upload'
 
 export function getUploadUrl() {
   return uploadUrl

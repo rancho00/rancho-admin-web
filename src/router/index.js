@@ -59,6 +59,31 @@ export const constantRoutes = [
       }
     ]
   },
+  // {
+  //   path: '/platform',
+  //   component: Layout,
+  //   meta: { title: '平台管理1', icon: 'user' },
+  //   children: [
+  //     {
+  //       path: '/memberIdentityAudit/list',
+  //       name: '/memberIdentityAudit/list',
+  //       component: () => import('@/views/icons/index'),
+  //       meta: { title: '会员身份证审核管理', icon: 'dashboard' }
+  //     },
+  //     {
+  //       path: '/memberIdentityAudit/update',
+  //       name: '/memberBankAudit/update',
+  //       component: () => import('@/views/icons/index'),
+  //       meta: { title: '修改会员身份证审核' },
+  //       hidden: true
+  //     },
+  //     {
+  //       path: '/memberIdentityAudit/detail',
+  //       name: '/memberIdentityAudit/detail',
+  //       component: () => import('@/views/system/memberIdentityAudit/detail'),
+  //       meta: { title: '会员身份证审核详情' },
+  //       hidden: true
+  //     }] },
   {
     path: '/404',
     component: () => import('@/views/404'),
