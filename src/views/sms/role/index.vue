@@ -80,11 +80,11 @@
         <el-form-item label="菜单">
           <el-tree
             ref="tree"
-            :check-strictly="checkStrictly"
+            :check-strictly="false"
             :data="menuListData"
             :props="defaultProps"
             show-checkbox
-            node-key="path"
+            node-key="id"
             class="permission-tree"
           />
         </el-form-item>
@@ -98,8 +98,6 @@
 </template>
 
 <script>
-import path from 'path'
-import { deepClone } from '@/utils'
 import { list, save, get, del, update } from '@/api/role'
 import { formatDate } from '@/utils/date'
 import { getHierarchyList as menuList } from '@/api/menu'
@@ -111,7 +109,7 @@ const defaultData = {
   name: '',
   description: '',
   status: 1,
-  menuListData: []
+  menuIdList: []
 }
 
 export default {
@@ -158,12 +156,11 @@ export default {
       dialogVisible: false,
       menuListData: [],
       defaultData: Object.assign({}, defaultData),
-      dialogType: 'new',
+      dialogType: '',
       defaultProps: {
         children: 'children',
-        label: 'title'
+        label: 'name'
       },
-      checkStrictly: false,
       rules: {
         name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
       }
@@ -177,7 +174,6 @@ export default {
     checkPermission,
     menuList() {
       menuList().then(response => {
-        this.serviceMenuListData = response.data
         this.menuListData = this.generateMenuList(response.data)
       })
     },
@@ -194,23 +190,20 @@ export default {
       if (this.$refs.tree) {
         this.$refs.tree.setCheckedNodes([])
       }
-      this.dialogType = 'new'
+      this.dialogType = 'add'
       this.dialogVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
     update(scope) {
-      this.dialogType = 'edit'
+      this.dialogType = 'update'
       this.dialogVisible = true
-      this.checkStrictly = true
       this.defaultData = Object.assign({}, scope.row)
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
         get(scope.row.id).then(response => {
-          const checkedNodes = this.generateMenuList(response.data.smsMenuList)
-          this.$refs.tree.setCheckedNodes(this.generateCheckedMenus(checkedNodes))
-          this.checkStrictly = false
+          this.$refs.tree.setCheckedKeys(response.data.menuIdList)
         })
       })
     },
@@ -236,9 +229,8 @@ export default {
             confirmButtonText: '确定',
             cancelButtonText: '取消'
           }).then(() => {
-            const isEdit = this.dialogType === 'edit'
-            const checkedKeys = this.$refs.tree.getCheckedKeys()
-            this.defaultData.menuListData = this.getCheckedMenus(deepClone(this.serviceMenuListData), '/', checkedKeys)
+            this.defaultData.menuIdList = this.$refs.tree.getCheckedKeys()
+            const isEdit = this.dialogType === 'update'
             if (isEdit) {
               update(this.defaultData.id, this.defaultData).then(response => {
                 this.$message({
@@ -273,8 +265,8 @@ export default {
       const res = []
       for (const menu of smsMenuList) {
         const data = {
-          path: path.resolve(basePath, menu.uri),
-          title: menu.name
+          id: menu.id,
+          name: menu.name
         }
         // 遍历子菜单
         if (menu.smsMenuList) {
@@ -283,58 +275,7 @@ export default {
         res.push(data)
       }
       return res
-    },
-    /**
-       * 获取选中的节点
-       * @param routes
-       * @param basePath
-       * @param checkedKeys
-       * @returns {[]}
-       */
-    getCheckedMenus(smsMenuList, basePath = '/', checkedKeys) {
-      const res = []
-
-      for (const menu of smsMenuList) {
-        const routePath = path.resolve(basePath, menu.uri)
-        // recursive child routes
-        if (menu.smsMenuList) {
-          menu.smsMenuList = this.getCheckedMenus(menu.smsMenuList, routePath, checkedKeys)
-        }
-        if (checkedKeys.includes(routePath) || (menu.smsMenuList && menu.smsMenuList.length >= 1)) {
-          res.push(menu)
-        }
-      }
-      return res
-    },
-    /**
-       *获取需要选中的节点
-       * @param routes
-       * @returns {Array}
-       */
-    generateCheckedMenus(smsMenuList) {
-      let data = []
-      smsMenuList.forEach(menu => {
-        data.push(menu)
-        if (menu.children) {
-          const temp = this.generateCheckedMenus(menu.children)
-          if (temp.length > 0) {
-            data = [...data, ...temp]
-          }
-        }
-      })
-      return data
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .app-container {
-    .roles-table {
-      margin-top: 30px;
-    }
-    .permission-tree {
-      margin-bottom: 30px;
-    }
-  }
-</style>

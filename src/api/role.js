@@ -18,13 +18,7 @@ export function save(data) {
   return request({
     url: '/role',
     method: 'post',
-    data:
-      {
-        name: data.name,
-        description: data.description,
-        status: data.status,
-        smsMenuList: data.menuListData
-      }
+    data
 
   })
 }
@@ -40,14 +34,7 @@ export function update(id, data) {
   return request({
     url: `/role/${id}`,
     method: 'put',
-    data:
-      {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        status: data.status,
-        smsMenuList: data.menuListData
-      }
+    data
   })
 }
 
