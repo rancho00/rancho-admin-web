@@ -30,8 +30,6 @@ export function list(params) {
   })
 }
 
-
-
 export function save(data) {
   return request({
     url: '/admin',
@@ -55,10 +53,10 @@ export function update(id, data) {
   })
 }
 
-export function updateStatus(id, status) {
+export function updateStatus(id, params) {
   return request({
     url: `/admin/${id}/status`,
     method: 'put',
-    param: status
+    params
   })
 }

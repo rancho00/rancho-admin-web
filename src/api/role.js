@@ -7,7 +7,7 @@ export function list() {
   })
 }
 
-export function getRoles() {
+export function getRoleList() {
   return request({
     url: '/role/simpleList',
     method: 'get'

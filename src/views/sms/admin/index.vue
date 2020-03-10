@@ -65,7 +65,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
 
     <el-dialog
-      :title="dialogType==='edit'?'编辑':'添加'"
+      :title="dialogType==='update'?'编辑':'添加'"
       :visible.sync="dialogVisible"
       width="40%"
     >
@@ -91,7 +91,7 @@
         <el-form-item label="角色">
           <el-select v-model="defaultData.roleIdList" multiple placeholder="请选择" style="width: 250px">
             <el-option
-              v-for="(item, index) in defaultData.roleList"
+              v-for="(item, index) in roleList"
               :key="item.name + index"
               :label="item.name"
               :value="item.id"
@@ -109,7 +109,7 @@
 
 <script>
 import { list, save, getById, update, updateStatus } from '@/api/admin'
-import { getRoles as roleList } from '@/api/role'
+import { getRoleList as roleList } from '@/api/role'
 import { formatDate } from '@/utils/date'
 import Pagination from '@/components/Pagination'
 import waves from '@/directive/waves'
@@ -119,7 +119,6 @@ const defaultData = {
   id: null,
   username: null,
   status: 1,
-  roleList: [],
   roleIdList: []
 }
 
@@ -179,11 +178,13 @@ export default {
           }
         } }],
         nickname: [{ required: true, message: '昵称不能为空', trigger: 'blur' }]
-      }
+      },
+      roleList: []
     }
   },
   created() {
     this.list()
+    this.getRoleList()
   },
   methods: {
     checkPermission,
@@ -201,12 +202,11 @@ export default {
     },
     save() {
       this.dialogVisible = true
-      this.dialogType = 'save'
+      this.dialogType = 'add'
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
       this.defaultData = Object.assign({}, defaultData)
-      this.getRoleList()
     },
     update(row) {
       this.dialogVisible = true
@@ -217,7 +217,6 @@ export default {
       getById(row.id).then(response => {
         const data = response.data
         this.defaultData = Object.assign({}, data)
-        this.getRoleList()
       })
     },
     updateStatus(index, row) {
@@ -232,7 +231,7 @@ export default {
         } else if (status === 0) {
           status = 1
         }
-        updateStatus(row.id, status).then(response => {
+        updateStatus(row.id, { 'status': status }).then(response => {
           this.$message({
             type: 'success',
             message: response.message
@@ -273,7 +272,7 @@ export default {
     },
     getRoleList() {
       roleList().then(response => {
-        this.defaultData.roleList = response.data
+        this.roleList = response.data
       })
     },
     sortChange(data) {
