@@ -79,9 +79,6 @@
         <el-form-item label="用户名：" prop="username">
           <el-input v-model="defaultData.username" style="width: 250px" />
         </el-form-item>
-        <el-form-item label="密码：" prop="password" v-if="this.dialogType==='add'">
-          <el-input v-model="defaultData.password" style="width: 250px" />
-        </el-form-item>
         <el-form-item label="昵称：" prop="nickname">
           <el-input v-model="defaultData.nickname" style="width: 250px" />
         </el-form-item>
@@ -180,7 +177,6 @@ export default {
             callback()
           }
         } }],
-        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
         nickname: [{ required: true, message: '昵称不能为空', trigger: 'blur' }]
       },
       roleList: []

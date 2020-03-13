@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 
-export function getHierarchyList(params) {
+export function getTreeMenuList(params) {
   return request({
-    url: '/menu/hierarchyList',
+    url: '/menu/treeMenuList',
     method: 'get',
     params
   })
