@@ -48,8 +48,8 @@ export function generateRoutes(menus) {
   //   } else {
   //     data.hidden = true
   //   }
-  //   if (menu.smsMenuList) {
-  //     data.children = generateRoutes(menu.smsMenuList)
+  //   if (menu.children) {
+  //     data.children = generateRoutes(menu.children)
   //   }
   //   permissions.push(menu.value)
   //   res.push(data)
@@ -64,8 +64,8 @@ export function generateRoutes(menus) {
     }
     permissions.push(firstMenu.value)
     const children = []
-    if (firstMenu.smsMenuList) {
-      firstMenu.smsMenuList.forEach(secondMenu => {
+    if (firstMenu.children) {
+      firstMenu.children.forEach(secondMenu => {
         children.push({
           path: secondMenu.uri,
           name: secondMenu.name,
@@ -74,8 +74,8 @@ export function generateRoutes(menus) {
           hidden: false
         })
         permissions.push(secondMenu.value)
-        if (secondMenu.smsMenuList) {
-          secondMenu.smsMenuList.forEach(functionMenu => {
+        if (secondMenu.children) {
+          secondMenu.children.forEach(functionMenu => {
             children.push({
               path: functionMenu.uri,
               name: functionMenu.name,

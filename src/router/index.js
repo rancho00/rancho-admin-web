@@ -84,6 +84,22 @@ export const constantRoutes = [
   //       meta: { title: '会员身份证审核详情' },
   //       hidden: true
   //     }] },
+  // {
+  //   path: '/extra1',
+  //   component: Layout,
+  //   meta: { title: '附加功能管理', icon: 'component' },
+  //   children: [
+  //     {
+  //       path: '/errorPage/401',
+  //       component: () => import('@/views/extra/error-page/401'),
+  //       meta: { title: '401', icon: 'icon' }
+  //     },
+  //     {
+  //       path: '/errorPage/404',
+  //       component: () => import('@/views/extra/error-page/404'),
+  //       meta: { title: '404', icon: 'icon' }
+  //     }]
+  // },
   {
     path: '/404',
     component: () => import('@/views/404'),
