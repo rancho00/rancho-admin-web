@@ -203,9 +203,29 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
         get(scope.row.id).then(response => {
-          this.$refs.tree.setCheckedKeys(response.data.menuIdList)
+          const checkedNodes = []
+          response.data.menuIdList.forEach(menuId => {
+            if (this.isFunctionNode(menuId, this.menuListData)) {
+              checkedNodes.push(menuId)
+            }
+          })
+          this.$refs.tree.setCheckedKeys(checkedNodes)
         })
       })
+    },
+    isFunctionNode(menuId, menuList) {
+      for (let i = 0; i < menuList.length; i++) {
+        const menu = menuList[i]
+        if (menuId === menu.id) {
+          return menu.children.length === 0
+        }
+        if (menu.children.length > 0) {
+          const isFunctionNode = this.isFunctionNode(menuId, menu.children)
+          if (isFunctionNode !== undefined) {
+            return isFunctionNode
+          }
+        }
+      }
     },
     del(scope) {
       this.$confirm('是否要删除操作?', '提示', {
@@ -229,7 +249,7 @@ export default {
             confirmButtonText: '确定',
             cancelButtonText: '取消'
           }).then(() => {
-            this.defaultData.menuIdList = this.$refs.tree.getCheckedKeys()
+            this.defaultData.menuIdList = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys())
             const isEdit = this.dialogType === 'update'
             if (isEdit) {
               update(this.defaultData.id, this.defaultData).then(response => {
