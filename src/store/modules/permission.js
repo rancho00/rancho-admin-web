@@ -1,4 +1,4 @@
-import { constantRoutes } from '@/router'
+import { constantRoutes, asyncRoutes } from '@/router'
 /* Layout */
 import Layout from '@/layout'
 
@@ -55,13 +55,18 @@ export function generateRoutes(menus) {
   //   res.push(data)
   // })
   menus.forEach(firstMenu => {
-    const route = {
-      path: firstMenu.uri,
-      name: firstMenu.name,
-      meta: { title: firstMenu.name, icon: firstMenu.icon },
-      component: Layout,
-      hidden: false
+    let route = asyncRoutes.find(r => r.path === firstMenu.uri)
+    if (!route) {
+      route = {
+        path: firstMenu.uri,
+        name: firstMenu.name,
+        meta: { title: firstMenu.name, icon: firstMenu.icon },
+        component: Layout,
+        hidden: false,
+        children: []
+      }
     }
+
     permissions.push(firstMenu.value)
     const children = []
     if (firstMenu.children) {
@@ -88,7 +93,7 @@ export function generateRoutes(menus) {
         }
       })
     }
-    route.children = children
+    route.children = route.children.concat(children)
     res.push(route)
   })
   return res

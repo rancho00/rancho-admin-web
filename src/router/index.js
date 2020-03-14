@@ -59,8 +59,21 @@ export const constantRoutes = [
       }
     ]
   },
+
   {
-    path: '/extra1',
+    path: '/404',
+    component: () => import('@/views/404'),
+    hidden: true
+  }
+]
+
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+export const asyncRoutes = [
+  {
+    path: '/extra',
     component: Layout,
     meta: { title: '附加功能管理', icon: 'component' },
     children: [
@@ -74,11 +87,6 @@ export const constantRoutes = [
         component: () => import('@/views/extra/error-page/404'),
         meta: { title: '404', icon: 'icon' }
       }]
-  },
-  {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
   }
 ]
 
