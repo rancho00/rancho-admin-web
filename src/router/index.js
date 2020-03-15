@@ -78,6 +78,11 @@ export const asyncRoutes = [
     meta: { title: '附加功能管理', icon: 'component' },
     children: [
       {
+        path: '/swagger',
+        component: () => import('@/views/extra/swagger/index'),
+        meta: { title: '接口文档', icon: 'icon' }
+      },
+      {
         path: '/errorPage/401',
         component: () => import('@/views/extra/error-page/401'),
         meta: { title: '401', icon: 'icon' }
