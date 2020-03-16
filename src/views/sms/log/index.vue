@@ -58,7 +58,7 @@
           <span>{{ scope.row.browser }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="请求耗时" align="center" width="200">
+      <el-table-column label="请求耗时(毫秒)" align="center" width="200">
         <template slot-scope="scope">
           <span>{{ scope.row.time }}</span>
         </template>

@@ -70,7 +70,7 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
 
-    <el-dialog :visible.sync="dialogVisible" title="异常详情" append-to-body top="0" width="85%">
+    <el-dialog :visible.sync="dialogVisible" title="异常详情" append-to-body top="0" width="75%">
       <pre>
         {{ errorInfo }}
       </pre>
