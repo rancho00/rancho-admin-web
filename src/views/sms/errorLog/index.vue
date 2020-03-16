@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.username" placeholder="用户名" style="width: 200px;" class="filter-item" />
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="search">
+      <el-button  class="filter-item" type="primary" icon="el-icon-search" @click="search">
         搜索
       </el-button>
     </div>
@@ -58,23 +58,28 @@
           <span>{{ scope.row.browser }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="请求耗时" align="center" width="200">
-        <template slot-scope="scope">
-          <span>{{ scope.row.time }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center">
+      <el-table-column label="创建时间" align="center" width="200">
         <template slot-scope="scope">{{ scope.row.createTime | formatDateTime }}</template>
+      </el-table-column>
+      <el-table-column label="异常详情"  align="center">
+        <template slot-scope="scope">
+          <el-button size="mini" type="text" @click="info(scope.row.id)">查看详情</el-button>
+        </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
 
+    <el-dialog :visible.sync="dialogVisible" title="异常详情" append-to-body top="0" width="85%">
+      <pre>
+        {{ errorInfo }}
+      </pre>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { list } from '@/api/log'
+import { list, get } from '@/api/log'
 import { formatDate } from '@/utils/date'
 import Pagination from '@/components/Pagination'
 import checkPermission from '@/utils/permission'
@@ -101,14 +106,16 @@ export default {
     return {
       listData: null,
       listQuery: {
-        logType: 'INFO',
+        logType: 'ERROR',
         username: undefined,
         pageNumber: 1,
         pageSize: 10,
         orderBy: ''
       },
       total: 0,
-      listLoading: true
+      listLoading: true,
+      dialogVisible: false,
+      errorInfo: ''
     }
   },
   created() {
@@ -139,6 +146,12 @@ export default {
       }
       this.listQuery.pageNumber = 1
       this.list()
+    },
+    info(id) {
+      this.dialogVisible = true
+      get(id).then(res => {
+        this.errorInfo = res.data.exceptionDetail
+      })
     }
   }
 }
