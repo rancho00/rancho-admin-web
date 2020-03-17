@@ -5,6 +5,9 @@
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="search">
         搜索
       </el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="download">
+        导出
+      </el-button>
     </div>
 
     <el-table
@@ -16,67 +19,42 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column width="30" type="expand">
-        <template slot-scope="scope">
-          <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item label="请求方法">
-              <span>{{ scope.row.method }}</span>
-            </el-form-item>
-            <el-form-item label="请求参数">
-              <span>{{ scope.row.params }}</span>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-table-column>
       <el-table-column prop="id" sortable="custom" label="ID" align="center" width="80">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column label="操作管理员" align="center" width="250">
+      <el-table-column label="用户名" align="center" width="200">
         <template slot-scope="scope">
           {{ scope.row.username }}
         </template>
       </el-table-column>
-      <el-table-column label="IP" align="center" width="200">
+      <el-table-column label="昵称" align="center" width="200">
         <template slot-scope="scope">
-          <span>{{ scope.row.requestIp }}</span>
+          <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="IP来源" align="center" width="300">
-        <template slot-scope="scope">
-          <span>{{ scope.row.address }}</span>
+      <el-table-column label="状态" align="center" width="200">
+        <template slot-scope="{row}">
+          <el-tag :type="row.status | statusFilter">
+            {{ row.status | statusFormat }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="描述" align="center" width="200">
-        <template slot-scope="scope">
-          <span>{{ scope.row.description }}</span>
-        </template>
+      <el-table-column label="上次登陆时间" align="center" width="300">
+        <template slot-scope="scope">{{ scope.row.lastLoginTime | formatDateTime }}</template>
       </el-table-column>
-      <el-table-column label="浏览器" align="center" width="200">
-        <template slot-scope="scope">
-          <span>{{ scope.row.browser }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="请求耗时" align="center" width="200">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.time <= 300">{{ scope.row.time }}ms</el-tag>
-          <el-tag v-else-if="scope.row.time <= 1000" type="warning">{{ scope.row.time }}ms</el-tag>
-          <el-tag v-else type="danger">{{ scope.row.time }}ms</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center">
+      <el-table-column label="创建时间" align="center" width="300">
         <template slot-scope="scope">{{ scope.row.createTime | formatDateTime }}</template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
-
   </div>
 </template>
 
 <script>
-import { list } from '@/api/log'
+import { list, download } from '@/api/admin'
 import { formatDate } from '@/utils/date'
 import Pagination from '@/components/Pagination'
 import checkPermission from '@/utils/permission'
@@ -84,6 +62,20 @@ import checkPermission from '@/utils/permission'
 export default {
   components: { Pagination },
   filters: {
+    statusFilter(status) {
+      const statusMap = {
+        0: 'danger',
+        1: 'success'
+      }
+      return statusMap[status]
+    },
+    statusFormat(status) {
+      const statusMap = {
+        0: '禁用',
+        1: '启用'
+      }
+      return statusMap[status]
+    },
     formatDate(time) {
       if (time == null || time === '') {
         return 'N/A'
@@ -103,7 +95,6 @@ export default {
     return {
       listData: null,
       listQuery: {
-        logType: 'INFO',
         username: undefined,
         pageNumber: 1,
         pageSize: 10,
@@ -141,6 +132,9 @@ export default {
       }
       this.listQuery.pageNumber = 1
       this.list()
+    },
+    download() {
+      download(this.listQuery)
     }
   }
 }

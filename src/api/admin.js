@@ -60,3 +60,11 @@ export function updateStatus(id, params) {
     params
   })
 }
+
+export function download(params) {
+  return request({
+    url: '/admin/download',
+    method: 'get',
+    params
+  })
+}
