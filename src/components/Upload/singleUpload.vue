@@ -20,8 +20,6 @@
   </div>
 </template>
 <script>
-import { getVisitUrl, getUploadUrl } from '@/utils/file'
-
 export default {
   name: 'SingleUpload',
   props: {
@@ -38,7 +36,7 @@ export default {
   },
   computed: {
     imageUrl() {
-      return getVisitUrl() + this.value
+      return this.$store.state.api.fileVisitUrl + this.value
     },
     imageName() {
       if (this.value != null && this.value !== '') {
@@ -63,7 +61,7 @@ export default {
   },
   created() {
     this.defaultData.folderName = this.folderName
-    this.uploadUrl = getUploadUrl()
+    this.uploadUrl = this.$store.state.api.fileUploadUrl
   },
   methods: {
     emitInput(val) {
