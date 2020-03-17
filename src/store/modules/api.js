@@ -6,7 +6,9 @@ const api = {
     // 图片上传
     uploadUrl: 'http://123.57.164.79:8089/file/upload',
     // swagger
-    swaggerApi: baseUrl + '/swagger-ui.html'
+    swaggerApi: baseUrl + '/swagger-ui.html',
+    // druid
+    druidApi: baseUrl + '/druid/index.html'
   }
 }
 

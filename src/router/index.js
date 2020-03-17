@@ -83,6 +83,11 @@ export const asyncRoutes = [
         meta: { title: '接口文档', icon: 'icon' }
       },
       {
+        path: '/druid',
+        component: () => import('@/views/extra/druid/index'),
+        meta: { title: 'SQL监控', icon: 'icon' }
+      },
+      {
         path: '/errorPage/401',
         component: () => import('@/views/extra/error-page/401'),
         meta: { title: '401', icon: 'icon' }
