@@ -65,6 +65,7 @@ export function download(params) {
   return request({
     url: '/admin/download',
     method: 'get',
-    params
+    params,
+    responseType: 'blob'
   })
 }

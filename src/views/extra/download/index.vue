@@ -56,6 +56,7 @@
 <script>
 import { list, download } from '@/api/admin'
 import { formatDate } from '@/utils/date'
+import { downloadFile } from '@/utils/index'
 import Pagination from '@/components/Pagination'
 import checkPermission from '@/utils/permission'
 
@@ -134,7 +135,14 @@ export default {
       this.list()
     },
     download() {
-      download(this.listQuery)
+      //this.beforeInit()
+      //this.downloadLoading = true
+      download(this.listQuery).then(result => {
+        downloadFile(result, '用户列表', 'xlsx')
+        //this.downloadLoading = false
+      }).catch(() => {
+        //this.downloadLoading = false
+      })
     }
   }
 }
