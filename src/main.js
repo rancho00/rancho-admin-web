@@ -8,6 +8,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 import '@/styles/index.scss' // global css
 
+import '@/styles/ruoyi.scss' // ruoyi css
+
 import App from './App'
 import store from './store'
 import router from './router'

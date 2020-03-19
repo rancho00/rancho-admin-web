@@ -1,14 +1,58 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-input v-model="listQuery.username" placeholder="用户名" style="width: 200px;" class="filter-item" />
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="search">
-        搜索
-      </el-button>
-      <el-button v-if="checkPermission('admin:save')" class="filter-item" type="primary" icon="el-icon-edit" @click="save">
-        添加
-      </el-button>
-    </div>
+    <el-form ref="queryForm" :model="listQuery" :inline="true">
+      <el-form-item label="用户名" prop="roleName">
+        <el-input
+          v-model="listQuery.username"
+          placeholder="请输入用户名"
+          clearable
+          size="small"
+          style="width: 240px"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="search">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetSearch">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          size="mini"
+          @click="save"
+        >新增</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="success"
+          icon="el-icon-edit"
+          size="mini"
+          :disabled="single"
+          @click="update"
+        >修改</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="danger"
+          icon="el-icon-delete"
+          size="mini"
+          :disabled="multiple"
+          @click="save"
+        >删除</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          icon="el-icon-download"
+          size="mini"
+          @click="download"
+          :loading="downloadLoading"
+        >导出</el-button>
+      </el-col>
+    </el-row>
 
     <el-table
       v-loading="listLoading"
@@ -18,8 +62,10 @@
       :data="listData"
       style="width: 100%;"
       @sort-change="sortChange"
+      @selection-change="handleSelectionChange"
     >
-      <el-table-column prop="id" sortable="custom" label="ID" align="center" width="80">
+      <el-table-column type="selection" width="40" align="center" />
+      <el-table-column prop="id" sortable="custom" label="ID" align="center" width="200">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
@@ -29,16 +75,19 @@
           {{ scope.row.username }}
         </template>
       </el-table-column>
-      <el-table-column label="昵称" align="center" width="200">
+      <el-table-column label="昵称" align="center" width="300">
         <template slot-scope="scope">
           <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" width="200">
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status | statusFormat }}
-          </el-tag>
+      <el-table-column label="禁用/启用" align="center" width="300">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="1"
+            :inactive-value="0"
+            @change="updateStatus(scope.row.id, scope.row.status)"
+          />
         </template>
       </el-table-column>
       <el-table-column label="上次登陆时间" align="center" width="300">
@@ -48,15 +97,13 @@
         <template slot-scope="scope">{{ scope.row.createTime | formatDateTime }}</template>
       </el-table-column>
       <el-table-column label="操作" align="center">
-        <template v-if="row.username!=='admin'" slot-scope="{row}">
-          <el-button v-if="checkPermission('admin:update')" type="primary" size="mini" @click="update(row)">
-            编辑
-          </el-button>
-          <el-button v-if="checkPermission('admin:updateStatus')" v-show="row.status==1" size="mini" type="danger" @click="updateStatus(row.$index, row)">
-            禁用
-          </el-button>
-          <el-button v-if="checkPermission('admin:updateStatus')" v-show="row.status==0" size="mini" type="success" @click="updateStatus(row.$index, row)">
-            启用
+        <template slot-scope="{row}">
+          <el-button
+            v-if="checkPermission('admin:update')"
+            size="mini"
+            type="text"
+            @click="update(row)"
+          >编辑
           </el-button>
         </template>
       </el-table-column>
@@ -108,10 +155,11 @@
 </template>
 
 <script>
-import { list, save, getById, update, updateStatus } from '@/api/admin'
+import { list, save, getById, update, updateStatus, download } from '@/api/admin'
 import { getRoleList as roleList } from '@/api/role'
 import { formatDate } from '@/utils/date'
 import Pagination from '@/components/Pagination'
+import { downloadFile } from '@/utils/index'
 import waves from '@/directive/waves'
 import checkPermission from '@/utils/permission'
 
@@ -120,6 +168,13 @@ const defaultData = {
   username: null,
   status: 1,
   roleIdList: []
+}
+
+const defaultQuery = {
+  username: undefined,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: ''
 }
 
 export default {
@@ -158,12 +213,7 @@ export default {
   data() {
     return {
       listData: null,
-      listQuery: {
-        username: undefined,
-        pageNumber: 1,
-        pageSize: 10,
-        orderBy: ''
-      },
+      listQuery: Object.assign({}, defaultQuery),
       total: 0,
       listLoading: true,
       dialogVisible: false,
@@ -179,7 +229,11 @@ export default {
         } }],
         nickname: [{ required: true, message: '昵称不能为空', trigger: 'blur' }]
       },
-      roleList: []
+      roleList: [],
+      single: true,
+      multiple: true,
+      ids: [],
+      downloadLoading: false
     }
   },
   created() {
@@ -200,6 +254,9 @@ export default {
         this.listLoading = false
       })
     },
+    resetSearch() {
+      this.listQuery = Object.assign({}, defaultQuery)
+    },
     save() {
       this.dialogVisible = true
       this.dialogType = 'add'
@@ -214,24 +271,19 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-      getById(row.id).then(response => {
+      const id = row.id || this.ids
+      getById(id).then(response => {
         const data = response.data
         this.defaultData = Object.assign({}, data)
       })
     },
-    updateStatus(index, row) {
+    updateStatus(id, status) {
       this.$confirm('是否要修改该状态?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let status = row.status
-        if (status === 1) {
-          status = 0
-        } else if (status === 0) {
-          status = 1
-        }
-        updateStatus(row.id, { 'status': status }).then(response => {
+        updateStatus(id, { 'status': status }).then(response => {
           this.$message({
             type: 'success',
             message: response.message
@@ -275,6 +327,15 @@ export default {
         this.roleList = response.data
       })
     },
+    download() {
+      this.downloadLoading = true
+      download(this.listQuery).then(result => {
+        downloadFile(result, '用户列表', 'xlsx')
+        this.downloadLoading = false
+      }).catch(() => {
+        this.downloadLoading = false
+      })
+    },
     sortChange(data) {
       const { prop, order } = data
       if (prop === 'id') {
@@ -286,6 +347,12 @@ export default {
       }
       this.listQuery.pageNumber = 1
       this.list()
+    },
+    // 多选框选中数据
+    handleSelectionChange(selection) {
+      this.ids = selection.map(item => item.id)
+      this.single = selection.length !== 1
+      this.multiple = !selection.length
     }
   }
 }
