@@ -1,10 +1,16 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-button v-if="checkPermission('role:save')" class="filter-item" type="primary" icon="el-icon-edit" @click="save">
-        添加
-      </el-button>
-    </div>
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          size="mini"
+          @click="addRole"
+          v-if="checkPermission('role:add')"
+        >新增</el-button>
+      </el-col>
+    </el-row>
 
     <el-table
       v-loading="listLoading"
@@ -40,48 +46,70 @@
         <template slot-scope="scope">{{ scope.row.createTime | formatDateTime }}</template>
       </el-table-column>
       <el-table-column align="center" label="操作">
-        <template v-if="scope.row.name!=='admin'" slot-scope="scope">
-          <el-button v-if="checkPermission('role:update')" type="primary" size="small" @click="update(scope)">编辑</el-button>
-          <el-button v-if="checkPermission('role:delete')" type="danger" size="small" @click="del(scope)">删除</el-button>
+        <template  slot-scope="scope">
+          <el-button
+            v-if="checkPermission('role:update')"
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="updateRole(scope)"
+          >编辑
+          </el-button>
+          <el-button
+            v-if="checkPermission('role:update')"
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="updateRoleMenu(scope)"
+          >授权菜单
+          </el-button>
+          <el-button
+            v-if="checkPermission('role:delete')"
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="deleteRole(scope)"
+          >删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="getRoles" />
 
     <el-dialog
       :visible.sync="dialogVisible"
-      :title="dialogType==='edit'?'编辑':'添加'"
+      :title="dialogTitle"
     >
       <el-form
-        ref="dataForm"
-        :model="defaultData"
+        ref="form"
+        :model="formData"
         :rules="rules"
         label-width="150px"
         size="small"
       >
         <el-form-item label="名称" prop="name">
-          <el-input v-model="defaultData.name" placeholder="名称" />
+          <el-input v-model="formData.name" placeholder="名称" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input
-            v-model="defaultData.description"
+            v-model="formData.description"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
             placeholder="描述"
           />
         </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="defaultData.status">
+          <el-radio-group v-model="formData.status">
             <el-radio :label="1">启用</el-radio>
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="菜单">
+        <el-form-item label="菜单" v-if="this.dialogType === 'updateMenu'">
           <el-tree
             ref="tree"
             :check-strictly="false"
-            :data="menuListData"
+            :data="menus"
             :props="defaultProps"
             show-checkbox
             node-key="id"
@@ -98,18 +126,17 @@
 </template>
 
 <script>
-import { list, save, get, del, update } from '@/api/role'
+import { getRoles, addRole, getRoleMenus, updateRole, updateRoleMenu, deleteRole } from '@/api/role'
 import { formatDate } from '@/utils/date'
-import { getTreeMenuList } from '@/api/menu'
+import { getTreeMenus } from '@/api/menu'
 import Pagination from '@/components/Pagination'
-import checkPermission from '@/utils/permission'
+import { checkPermission } from '@/utils/permission'
 
-const defaultData = {
+const formData = {
   id: null,
   name: '',
   description: '',
-  status: 1,
-  menuIdList: []
+  status: 1
 }
 
 export default {
@@ -154,8 +181,9 @@ export default {
       total: 0,
       listLoading: true,
       dialogVisible: false,
-      menuListData: [],
-      defaultData: Object.assign({}, defaultData),
+      menus: [],
+      formData: Object.assign({}, formData),
+      dialogTitle: '',
       dialogType: '',
       defaultProps: {
         children: 'children',
@@ -167,46 +195,54 @@ export default {
     }
   },
   created() {
-    this.getMenuList()
-    this.list()
+    this.getRoles()
+    this.getMenus()
   },
   methods: {
     checkPermission,
-    getMenuList() {
-      getTreeMenuList().then(response => {
-        this.menuListData = this.generateMenuList(response.data)
+    getMenus() {
+      getTreeMenus().then(response => {
+        this.menus = this.generateMenuList(response.data)
       })
     },
-    list() {
+    getRoles() {
       this.listLoading = true
-      list(this.listQuery).then(response => {
+      getRoles(this.listQuery).then(response => {
         this.listData = response.data.list
         this.total = response.data.total
         this.listLoading = false
       })
     },
-    save() {
-      this.defaultData = Object.assign({}, defaultData)
+    addRole() {
+      this.formData = Object.assign({}, formData)
       if (this.$refs.tree) {
         this.$refs.tree.setCheckedNodes([])
       }
       this.dialogType = 'add'
+      this.dialogTitle = '添加'
       this.dialogVisible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.$refs['form'].clearValidate()
       })
     },
-    update(scope) {
+    updateRole(scope) {
       this.dialogType = 'update'
+      this.dialogTitle = '编辑'
       this.dialogVisible = true
-      this.defaultData = Object.assign({}, scope.row)
+      this.formData = Object.assign({}, scope.row)
+    },
+    updateRoleMenu(scope) {
+      this.dialogType = 'updateMenu'
+      this.dialogTitle = '授权菜单'
+      this.dialogVisible = true
+      this.formData = Object.assign({}, scope.row)
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-        get(scope.row.id).then(response => {
+        this.$refs['form'].clearValidate()
+        getRoleMenus(scope.row.id).then(response => {
           const checkedNodes = []
-          response.data.menuIdList.forEach(menuId => {
-            if (this.isFunctionNode(menuId, this.menuListData)) {
-              checkedNodes.push(menuId)
+          response.data.forEach(roleMenu => {
+            if (this.isFunctionNode(roleMenu.menuId, this.menus)) {
+              checkedNodes.push(roleMenu.menuId)
             }
           })
           this.$refs.tree.setCheckedKeys(checkedNodes)
@@ -227,47 +263,55 @@ export default {
         }
       }
     },
-    del(scope) {
+    deleteRole(scope) {
       this.$confirm('是否要删除操作?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        del(scope.row.id).then(response => {
+        deleteRole(scope.row.id).then(response => {
           this.$message({
             type: 'success',
             message: response.message
           })
-          this.list()
+          this.getRoles()
         })
       })
     },
     handleConfirm() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs['form'].validate((valid) => {
         if (valid) {
           this.$confirm('是否要确认?', '提示', {
             confirmButtonText: '确定',
-            cancelButtonText: '取消'
+            cancelButtonText: '取消',
+            type: 'warning'
           }).then(() => {
-            this.defaultData.menuIdList = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys())
-            const isEdit = this.dialogType === 'update'
-            if (isEdit) {
-              update(this.defaultData.id, this.defaultData).then(response => {
+            if (this.dialogType === 'update') {
+              updateRole(this.formData.id, this.formData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.list()
+                this.getRoles()
+              })
+            } else if (this.dialogType === 'updateMenu') {
+              updateRoleMenu(this.formData.id, this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys())).then(response => {
+                this.$message({
+                  message: response.message,
+                  type: 'success'
+                })
+                this.dialogVisible = false
+                this.getRoles()
               })
             } else {
-              save(this.defaultData).then(response => {
+              addRole(this.formData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.list()
+                this.getRoles()
               })
             }
           })

@@ -5,6 +5,7 @@ import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
+import Layout from "@/layout";
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
@@ -34,13 +35,15 @@ router.beforeEach(async(to, from, next) => {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          const { menus } = await store.dispatch('admin/getInfo')
+          // const { roles } = await store.dispatch('admin/getInfo')
+          await store.dispatch('admin/getInfo')
+
+          const routes = await store.dispatch('route/getRoutes')
 
           // generate accessible routes map based on roles
-          const accessRoutes = await store.dispatch('permission/generateRoutes', menus)
-
+          // const accessRoutes = await store.dispatch('permission/generateRoutes', routers)
           // dynamically add accessible routes
-          router.addRoutes(accessRoutes)
+          router.addRoutes(routes)
 
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record

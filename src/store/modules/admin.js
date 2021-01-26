@@ -7,7 +7,7 @@ const state = {
   name: '',
   avatar: '',
   roles: [],
-  menus: []
+  permissions: []
 }
 
 const mutations = {
@@ -23,8 +23,8 @@ const mutations = {
   SET_ROLES: (state, roles) => {
     state.roles = roles
   },
-  SET_MENUS: (state, menus) => {
-    state.menus = menus
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions
   }
 }
 
@@ -52,11 +52,11 @@ const actions = {
         const data = response.data
         const admin = data.admin
         const roles = data.roles
-        const menus = data.menus
+        const permissions = data.permissions
         commit('SET_NAME', admin.username)
         commit('SET_AVATAR', admin.avatar)
         commit('SET_ROLES', roles)
-        commit('SET_MENUS', menus)
+        commit('SET_PERMISSIONS', permissions)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -72,7 +72,7 @@ const actions = {
         commit('SET_NAME', '')
         commit('SET_AVATAR', '')
         commit('SET_ROLES', [])
-        commit('SET_MENUS', [])
+        commit('SET_PERMISSIONS', [])
         removeToken()
         resetRouter()
         resolve()
@@ -89,7 +89,7 @@ const actions = {
       commit('SET_NAME', '')
       commit('SET_AVATAR', '')
       commit('SET_ROLES', [])
-      commit('SET_MENUS', [])
+      commit('SET_PERMISSIONS', [])
       removeToken()
       resolve()
     })

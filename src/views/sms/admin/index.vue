@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form ref="queryForm" :model="listQuery" :inline="true">
-      <el-form-item label="用户名" prop="roleName">
+      <el-form-item label="用户名">
         <el-input
           v-model="listQuery.username"
           placeholder="请输入用户名"
@@ -12,7 +12,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="search">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetSearch">重置</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -22,7 +22,7 @@
           type="primary"
           icon="el-icon-plus"
           size="mini"
-          @click="save"
+          @click="addAdmin"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -31,7 +31,7 @@
           icon="el-icon-edit"
           size="mini"
           :disabled="single"
-          @click="update"
+          @click="updateAdmin"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -40,7 +40,7 @@
           icon="el-icon-delete"
           size="mini"
           :disabled="multiple"
-          @click="save"
+          @click="addAdmin"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -81,12 +81,12 @@
         </template>
       </el-table-column>
       <el-table-column label="禁用/启用" align="center" width="300">
-        <template slot-scope="scope">
+        <template slot-scope="scope" v-if="scope.row.username !== 'admin'">
           <el-switch
             v-model="scope.row.status"
             :active-value="1"
             :inactive-value="0"
-            @change="updateStatus(scope.row.id, scope.row.status)"
+            @change="updateAdminStatus(scope.row.id, scope.row.status)"
           />
         </template>
       </el-table-column>
@@ -97,48 +97,49 @@
         <template slot-scope="scope">{{ scope.row.createTime | formatDateTime }}</template>
       </el-table-column>
       <el-table-column label="操作" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{row}" v-if="row.username !== 'admin'">
           <el-button
             v-if="checkPermission('admin:update')"
             size="mini"
             type="text"
-            @click="update(row)"
+            icon="el-icon-edit"
+            @click="updateAdmin(row)"
           >编辑
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="list" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNumber" :limit.sync="listQuery.pageSize" @pagination="getAdmins" />
 
     <el-dialog
-      :title="dialogType==='update'?'编辑':'添加'"
+      :title="dialogTitle"
       :visible.sync="dialogVisible"
       width="40%"
     >
       <el-form
-        ref="dataForm"
-        :model="defaultData"
+        ref="form"
+        :model="formData"
         :rules="rules"
         label-width="150px"
         size="small"
       >
         <el-form-item label="用户名：" prop="username">
-          <el-input v-model="defaultData.username" style="width: 250px" />
+          <el-input v-model="formData.username" style="width: 250px" />
         </el-form-item>
         <el-form-item label="昵称：" prop="nickname">
-          <el-input v-model="defaultData.nickname" style="width: 250px" />
+          <el-input v-model="formData.nickname" style="width: 250px" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="defaultData.status">
+          <el-radio-group v-model="formData.status">
             <el-radio :label="1">启用</el-radio>
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="defaultData.roleIdList" multiple placeholder="请选择" style="width: 250px">
+          <el-select v-model="formData.roleIds" multiple placeholder="请选择" style="width: 250px">
             <el-option
-              v-for="(item, index) in roleList"
+              v-for="(item, index) in roles"
               :key="item.name + index"
               :label="item.name"
               :value="item.id"
@@ -155,23 +156,23 @@
 </template>
 
 <script>
-import { list, save, getById, update, updateStatus, download } from '@/api/admin'
-import { getRoleList as roleList } from '@/api/role'
+import { getAdmins, addAdmin, getAdmin, updateAdmin, updateAdminStatus, download } from '@/api/admin'
+import { getAllRoles } from '@/api/role'
 import { formatDate } from '@/utils/date'
 import Pagination from '@/components/Pagination'
 import { downloadFile } from '@/utils/index'
 import waves from '@/directive/waves'
-import checkPermission from '@/utils/permission'
+import { checkPermission } from '@/utils/permission'
 
-const defaultData = {
+const defaultFormData = {
   id: null,
   username: null,
   status: 1,
-  roleIdList: []
+  roleIds: []
 }
 
-const defaultQuery = {
-  username: undefined,
+const defaultQueryData = {
+  username: null,
   pageNumber: 1,
   pageSize: 10,
   orderBy: ''
@@ -181,20 +182,6 @@ export default {
   components: { Pagination },
   directives: { waves },
   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        0: 'danger',
-        1: 'success'
-      }
-      return statusMap[status]
-    },
-    statusFormat(status) {
-      const statusMap = {
-        0: '禁用',
-        1: '启用'
-      }
-      return statusMap[status]
-    },
     formatDate(time) {
       if (time == null || time === '') {
         return 'N/A'
@@ -212,13 +199,14 @@ export default {
   },
   data() {
     return {
-      listData: null,
-      listQuery: Object.assign({}, defaultQuery),
-      total: 0,
       listLoading: true,
+      listData: [],
+      listQuery: Object.assign({}, defaultQueryData),
+      total: 0,
       dialogVisible: false,
       dialogType: '',
-      defaultData: Object.assign({}, defaultData),
+      dialogTitle: '',
+      formData: Object.assign({}, defaultFormData),
       rules: {
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }, { validator: (rule, value, callback) => {
           if (value.length < 4) {
@@ -229,7 +217,7 @@ export default {
         } }],
         nickname: [{ required: true, message: '昵称不能为空', trigger: 'blur' }]
       },
-      roleList: [],
+      roles: [],
       single: true,
       multiple: true,
       ids: [],
@@ -237,94 +225,104 @@ export default {
     }
   },
   created() {
-    this.list()
-    this.getRoleList()
+    this.getAdmins()
+    this.getAllRoles()
   },
   methods: {
     checkPermission,
     search() {
       this.listQuery.pageNumber = 1
-      this.list()
+      this.getAdmins()
     },
-    list() {
+    getAdmins() {
       this.listLoading = true
-      list(this.listQuery).then(response => {
+      getAdmins(this.listQuery).then(response => {
         this.listData = response.data.list
         this.total = response.data.total
         this.listLoading = false
       })
     },
-    resetSearch() {
-      this.listQuery = Object.assign({}, defaultQuery)
+    reset() {
+      this.listQuery = Object.assign({}, defaultQueryData)
+      this.getAdmins()
     },
-    save() {
+    addAdmin() {
       this.dialogVisible = true
       this.dialogType = 'add'
+      this.dialogTitle = '新增'
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.$refs['form'].clearValidate()
       })
-      this.defaultData = Object.assign({}, defaultData)
+      this.formData = Object.assign({}, defaultFormData)
     },
-    update(row) {
+    updateAdmin(row) {
       this.dialogVisible = true
       this.dialogType = 'update'
+      this.dialogTitle = '编辑'
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.$refs['form'].clearValidate()
       })
       const id = row.id || this.ids
-      getById(id).then(response => {
+      getAdmin(id).then(response => {
         const data = response.data
-        this.defaultData = Object.assign({}, data)
+        this.formData = Object.assign({}, data)
+        if (data.adminRoles) {
+          const roleIds = []
+          data.adminRoles.forEach(adminRoel => {
+            roleIds.push(adminRoel.roleId)
+          })
+          this.formData.roleIds = roleIds
+        }
       })
     },
-    updateStatus(id, status) {
+    updateAdminStatus(id, status) {
       this.$confirm('是否要修改该状态?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        updateStatus(id, { 'status': status }).then(response => {
+        updateAdminStatus(id, { 'status': status }).then(response => {
           this.$message({
             type: 'success',
             message: response.message
           })
-          this.list()
+          this.getAdmins()
         })
       })
     },
     handleConfirm() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs['form'].validate((valid) => {
         if (valid) {
           this.$confirm('是否要确认?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消'
           }).then(() => {
             if (this.dialogType === 'update') {
-              update(this.defaultData.id, this.defaultData).then(response => {
+              updateAdmin(this.formData.id, this.formData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.list()
+                this.getAdmins()
               })
             } else {
-              save(this.defaultData).then(response => {
+              addAdmin(this.formData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'
                 })
                 this.dialogVisible = false
-                this.list()
+                this.getAdmins()
               })
             }
           })
         }
       })
     },
-    getRoleList() {
-      roleList().then(response => {
-        this.roleList = response.data
+    getAllRoles() {
+      getAllRoles().then(response => {
+        this.roles = response.data
       })
     },
     download() {
@@ -346,7 +344,7 @@ export default {
         }
       }
       this.listQuery.pageNumber = 1
-      this.list()
+      this.getAdmins()
     },
     // 多选框选中数据
     handleSelectionChange(selection) {

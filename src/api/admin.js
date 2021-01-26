@@ -15,6 +15,13 @@ export function getInfo() {
   })
 }
 
+export function getRoutes() {
+  return request({
+    url: '/admin/route',
+    method: 'get'
+  })
+}
+
 export function logout() {
   return request({
     url: '/admin/logout',
@@ -22,7 +29,7 @@ export function logout() {
   })
 }
 
-export function list(params) {
+export function getAdmins(params) {
   return request({
     url: '/admin',
     method: 'get',
@@ -30,7 +37,7 @@ export function list(params) {
   })
 }
 
-export function save(data) {
+export function addAdmin(data) {
   return request({
     url: '/admin',
     method: 'post',
@@ -38,14 +45,14 @@ export function save(data) {
   })
 }
 
-export function getById(id) {
+export function getAdmin(id) {
   return request({
     url: `/admin/${id}`,
     method: 'get'
   })
 }
 
-export function update(id, data) {
+export function updateAdmin(id, data) {
   return request({
     url: `/admin/${id}`,
     method: 'put',
@@ -53,7 +60,7 @@ export function update(id, data) {
   })
 }
 
-export function updateStatus(id, params) {
+export function updateAdminStatus(id, params) {
   return request({
     url: `/admin/${id}/status`,
     method: 'put',

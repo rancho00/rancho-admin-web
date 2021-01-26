@@ -1,22 +1,14 @@
 import request from '@/utils/request'
 
-export function getTreeMenuList(params) {
+export function getTreeMenus(params) {
   return request({
-    url: '/menu/treeMenuList',
+    url: '/menu/treeMenus',
     method: 'get',
     params
   })
 }
 
-export function list(params) {
-  return request({
-    url: '/menu',
-    method: 'get',
-    params
-  })
-}
-
-export function save(data) {
+export function addMenu(data) {
   return request({
     url: '/menu',
     method: 'post',
@@ -24,14 +16,14 @@ export function save(data) {
   })
 }
 
-export function get(id) {
+export function getMenu(id) {
   return request({
     url: `/menu/${id}`,
     method: 'get'
   })
 }
 
-export function update(id, data) {
+export function updateMenu(id, data) {
   return request({
     url: `/menu/${id}`,
     method: 'put',
@@ -39,15 +31,8 @@ export function update(id, data) {
   })
 }
 
-export function updateStatus(id, params) {
-  return request({
-    url: `/menu/${id}/status`,
-    method: 'put',
-    params
-  })
-}
 
-export function del(id) {
+export function deleteMenu(id) {
   return request({
     url: `/menu/${id}`,
     method: 'delete'

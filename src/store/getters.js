@@ -5,8 +5,8 @@ const getters = {
   avatar: state => state.admin.avatar,
   name: state => state.admin.name,
   roles: state => state.admin.roles,
-  permission_routes: state => state.permission.routes,
-  psermissions: state => state.permission.permissions,
+  routes: state => state.route.routes,
+  permissions: state => state.admin.permissions,
   swaggerApi: state => state.api.swaggerApi,
   druidApi: state => state.api.druidApi
 }

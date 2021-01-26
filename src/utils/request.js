@@ -46,6 +46,7 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
+
     // if the custom code is not 20000, it is judged as an error.
     /**
      * 200：操作成功
@@ -88,12 +89,15 @@ service.interceptors.response.use(
     }
   },
   error => {
-    Message({
-      message: '服务器异常',
-      type: 'error',
-      duration: 5 * 1000
-    })
-    return Promise.reject(error)
+    if (error && error.response && error.response.status) {
+      const data = error.response.data
+      Message({
+        message: data.message,
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject(error)
+    }
   }
 )
 

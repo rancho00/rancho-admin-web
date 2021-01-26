@@ -1,20 +1,20 @@
 import request from '@/utils/request'
 
-export function list() {
+export function getRoles() {
   return request({
     url: '/role',
     method: 'get'
   })
 }
 
-export function getRoleList() {
+export function getAllRoles() {
   return request({
     url: '/role/simpleList',
     method: 'get'
   })
 }
 
-export function save(data) {
+export function addRole(data) {
   return request({
     url: '/role',
     method: 'post',
@@ -23,14 +23,14 @@ export function save(data) {
   })
 }
 
-export function get(id) {
+export function getRoleMenus(id) {
   return request({
-    url: `/role/${id}`,
+    url: `/role/${id}/menu`,
     method: 'get'
   })
 }
 
-export function update(id, data) {
+export function updateRole(id, data) {
   return request({
     url: `/role/${id}`,
     method: 'put',
@@ -38,7 +38,15 @@ export function update(id, data) {
   })
 }
 
-export function del(id) {
+export function updateRoleMenu(id, data) {
+  return request({
+    url: `/role/${id}/menu`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteRole(id) {
   return request({
     url: `/role/${id}`,
     method: 'delete'
