@@ -22,6 +22,14 @@ export function getRoutes() {
   })
 }
 
+export function updateLoginAdminPassword(data) {
+  return request({
+    url: '/admin/password',
+    method: 'put',
+    data: data
+  })
+}
+
 export function logout() {
   return request({
     url: '/admin/logout',
@@ -53,6 +61,22 @@ export function getAdmin(id) {
 }
 
 export function updateAdmin(id, data) {
+  return request({
+    url: `/admin/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function updateAdminPassword(id, data) {
+  return request({
+    url: `/admin/${id}/password`,
+    method: 'put',
+    data: data
+  })
+}
+
+export function uploadAdminAvatar(id, data) {
   return request({
     url: `/admin/${id}`,
     method: 'put',

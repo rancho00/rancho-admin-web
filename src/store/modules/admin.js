@@ -6,6 +6,7 @@ const state = {
   token: getToken(),
   name: '',
   avatar: '',
+  type: '',
   roles: [],
   permissions: []
 }
@@ -25,6 +26,9 @@ const mutations = {
   },
   SET_PERMISSIONS: (state, permissions) => {
     state.permissions = permissions
+  },
+  SET_TYPE: (state, type) => {
+    state.type = type
   }
 }
 
@@ -57,6 +61,7 @@ const actions = {
         commit('SET_AVATAR', admin.avatar)
         commit('SET_ROLES', roles)
         commit('SET_PERMISSIONS', permissions)
+        commit('SET_TYPE', admin.type)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -73,6 +78,7 @@ const actions = {
         commit('SET_AVATAR', '')
         commit('SET_ROLES', [])
         commit('SET_PERMISSIONS', [])
+        commit('SET_TYPE', '')
         removeToken()
         resetRouter()
         resolve()
