@@ -59,20 +59,20 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/admin',
-    component: Layout,
-    hidden: true,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'profile',
-        component: (resolve) => require(['@/views/admin/profile/index'], resolve),
-        name: 'Profile',
-        meta: { title: '个人中心', icon: 'user' }
-      }
-    ]
-  },
+  // {
+  //   path: '/admin',
+  //   component: Layout,
+  //   hidden: true,
+  //   redirect: '/profile',
+  //   children: [
+  //     {
+  //       path: 'profile',
+  //       component: (resolve) => require(['@/views/admin/profile/index'], resolve),
+  //       name: 'Profile',
+  //       meta: { title: '个人中心', icon: 'user' }
+  //     }
+  //   ]
+  // },
   {
     path: '/404',
     component: () => import('@/views/404'),

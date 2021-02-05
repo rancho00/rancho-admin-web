@@ -104,6 +104,7 @@ export function generateRoutes(routes) {
   // })
   routes.forEach(route => {
     route.component = Layout
+    route.alwaysShow = true
     if (route.children !== undefined) {
       route.children.forEach(nextRoute => {
         nextRoute.component = loadView(nextRoute.component)

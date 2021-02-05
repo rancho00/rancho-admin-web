@@ -9,6 +9,8 @@ const getters = {
   permissions: state => state.admin.permissions,
   swaggerApi: state => state.api.swaggerApi,
   druidApi: state => state.api.druidApi,
-  type: state => state.admin.type
+  type: state => state.admin.type,
+  baseUrl: state => state.api.baseUrl
+
 }
 export default getters

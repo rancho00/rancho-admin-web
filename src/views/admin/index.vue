@@ -143,8 +143,20 @@
         <el-form-item label="昵称：" prop="nickname">
           <el-input v-model="formData.nickname"/>
         </el-form-item>
-        <el-form-item label="密码：" prop="password" v-if="dialogType == 'add'" type="password">
-          <el-input v-model="formData.password"/>
+        <el-form-item label="密码：" prop="password" v-if="dialogType == 'add'">
+          <el-input
+            :key="passwordType"
+            ref="password"
+            v-model="formData.password"
+            :type="passwordType"
+            placeholder="密码"
+            name="password"
+            tabindex="2"
+            auto-complete="on"
+          />
+          <span class="show-pwd" @click="showPwd">
+            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          </span>
         </el-form-item>
         <el-form-item label="类型"  prop="type">
           <el-radio-group v-model="formData.type">
@@ -158,7 +170,7 @@
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="角色">
+        <el-form-item label="角色" v-if="formData.type == 'common'">
           <el-select v-model="formData.roleIds" multiple placeholder="请选择" style="width: 100%">
             <el-option
               v-for="(item, index) in roles"
@@ -185,10 +197,34 @@
           <el-input v-model="admin.nickname" :disabled="true"/>
         </el-form-item>
         <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="admin.newPassword" placeholder="请输入新密码" type="password" />
+          <el-input
+            :key="passwordType"
+            ref="password"
+            v-model="admin.newPassword"
+            :type="passwordType"
+            placeholder="请输入新密码"
+            name="password"
+            tabindex="2"
+            auto-complete="on"
+          />
+          <span class="show-pwd" @click="showPwd">
+            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          </span>
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="admin.confirmPassword" placeholder="请确认密码" type="password" />
+          <el-input
+            :key="passwordType"
+            ref="password"
+            v-model="admin.confirmPassword"
+            :type="passwordType"
+            placeholder="请确认密码"
+            name="password"
+            tabindex="2"
+            auto-complete="on"
+          />
+          <span class="show-pwd" @click="showPwd">
+            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          </span>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -300,7 +336,8 @@ export default {
       downloadLoading: false,
       pwdDialogVisible: false,
       admin: {},
-      loginAdminType: null
+      loginAdminType: null,
+      passwordType: 'password'
     }
   },
   created() {
@@ -354,7 +391,6 @@ export default {
           data.roleIds = roleIds
         }
         this.formData = data
-        console.log(this.formData)
       })
     },
     updateAdminPassword(row){
@@ -455,7 +491,29 @@ export default {
       this.ids = selection.map(item => item.id)
       this.single = selection.length !== 1
       this.multiple = !selection.length
+    },
+    showPwd() {
+      if (this.passwordType === 'password') {
+        this.passwordType = ''
+      } else {
+        this.passwordType = 'password'
+      }
+      this.$nextTick(() => {
+        this.$refs.password.focus()
+      })
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+$dark_gray:#889aa4;
+  .show-pwd {
+    position: absolute;
+    right: 10px;
+    top: 7px;
+    font-size: 16px;
+    color: $dark_gray;
+    cursor: pointer;
+    user-select: none;
+  }
+</style>
