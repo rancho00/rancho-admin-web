@@ -14,3 +14,11 @@ export function getLog(id) {
     method: 'get'
   })
 }
+
+export function getServerLogs(params) {
+  return request({
+    url: '/log/server',
+    method: 'get',
+    params
+  })
+}

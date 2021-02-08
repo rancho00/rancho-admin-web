@@ -344,7 +344,7 @@ export default {
             type: 'warning'
           }).then(() => {
             if (this.dialogType === 'update') {
-              updateDeploy(this.formData).then(response => {
+              updateDeploy(this.formData.id,this.formData).then(response => {
                 this.$message({
                   message: response.message,
                   type: 'success'

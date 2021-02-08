@@ -24,9 +24,9 @@ export function getDeploy(id) {
   })
 }
 
-export function updateDeploy(data) {
+export function updateDeploy(id,data) {
   return request({
-    url: `/deploy`,
+    url: `/deploy/${id}`,
     method: 'put',
     data
   })
